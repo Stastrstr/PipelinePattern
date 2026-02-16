@@ -1,0 +1,9 @@
+<Solution>
+  <Folder Name="/Solution Items/">
+    <File Path=".editorconfig" />
+    <File Path="README.md" />
+  </Folder>
+  <Project Path="FR.Stateful.Pipeline.Abstractions/FR.Stateful.Pipeline.Abstractions.csproj" />
+  <Project Path="FR.Stateful.Pipeline/FR.Stateful.Pipeline.csproj" />
+  <Project Path="PipelinePattern/PipelinePattern.csproj" />
+</Solution>
