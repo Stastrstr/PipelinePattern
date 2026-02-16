@@ -1,35 +1,38 @@
-Fluent Stateful Pipeline in .NET
-A lightweight, SOLID-compliant implementation of the Mediator and Decorator patterns designed to replace complex conditional logic with a type-safe, observable business workflow.
+# Fluent Stateful Pipeline for .NET
 
-🚀 Overview
-This project demonstrates a "Stateful Pipeline" architecture. Unlike a standard Chain of Responsibility, this pattern uses a shared State Object and Selector Delegates to ensure that data flows through business handlers without the need for type casting or heavy reflection.
+A lightweight, SOLID-compliant implementation of the **Mediator** and **Decorator** patterns. This architecture replaces complex conditional logic and "if-statement hell" with a type-safe, observable business workflow.
 
-Key Features:
-Type Safety: Uses generic constraints to ensure Handlers only receive the specific data they need.
+## 🚀 The Problem
+In complex business processes, "Specification Pattern" isn't enough because it only returns a boolean. Traditional "Chain of Responsibility" often leads to forced downcasting and "God Object" states. 
 
-Railway Oriented Programming: Integrated with the ErrorOr library for clean short-circuiting and error handling.
+This library provides a **Stateful Pipeline** that allows each step to:
+1.  **Select** only the specific data it needs (Interface Segregation).
+2.  **Short-circuit** the flow using `ErrorOr`.
+3.  **Access** results from any previous step without tight coupling.
 
-Observability: Built-in Decorator Pattern for cross-cutting concerns (Logging, Performance Monitoring) via high-performance LoggerMessage definitions.
+---
 
-Fluent API: Extension-based orchestration that reads like a business requirements document.
+## 🏗️ Architecture
 
-SOLID Principles: High adherence to Interface Segregation and Single Responsibility.
+The solution is built on three pillars:
 
-🏗️ Architecture
-The solution is divided into three distinct layers:
+- **The State:** A simple DTO that travels through the pipeline.
+- **The Handlers:** Pure business logic units that are unaware of the global state.
+- **The Wiring:** Extension methods that act as the "Technical Glue," mapping state properties to handler inputs.
 
-Core Infrastructure: Generic interfaces (IPipelineHandler, IStep) and the PipelineBuilder.
 
-Business Logic: Highly focused, single-purpose Handlers that perform calculations or persistence.
 
-Wiring Layer: Extension methods that map the global state to individual handler inputs.
+---
 
-💻 Example Usage
-The following snippet shows a workflow that calculates order totals, applies discounts, determines savings, and persists the result to Azure.
+## 💻 Example Usage
 
-C#
+The orchestration reads like a high-level business requirements document.
+
+```csharp
+// 1. Initialize your state
 var state = new OrderState { Amount = 100, Quantity = 5 };
 
+// 2. Build and Execute
 var result = await new PipelineBuilder<OrderState>(state, loggingBehavior)
     .CalculateTotal(new CalculateTotalSumHandler())
     .ApplyDiscount(new ApplyTenPercentDiscountHandler())
@@ -37,16 +40,8 @@ var result = await new PipelineBuilder<OrderState>(state, loggingBehavior)
     .PersistToAzure(new SaveToAzureStorageHandler())
     .ExecuteAsync();
 
+// 3. Handle the outcome (Railway Oriented Programming)
 result.Switch(
-    success => Console.WriteLine($"Success: {success.Savings}"),
-    errors  => Console.WriteLine($"Failed: {errors.First().Description}")
+    success => Console.WriteLine($"Flow Complete. Savings: {success.Savings}"),
+    errors  => Console.WriteLine($"Flow Halted: {errors.First().Description}")
 );
-🛠️ Performance Highlights
-Zero Reflection: The pipeline uses pre-compiled delegates (Func<TState, TInput>), making it significantly faster than reflection-based mediators.
-
-Allocation-Free Logging: The LoggingBehavior utilizes LoggerMessage.Define to minimize heap allocations during telemetry capture.
-
-📦 Dependencies
-ErrorOr - Functional error handling.
-
-Microsoft.Extensions.Logging - Extensible logging framework.
